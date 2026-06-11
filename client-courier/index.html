@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LogiParalel | Courier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Top Navbar -->
+    <header class="top-nav">
+      <div class="brand">
+        <i class="ph-fill ph-moped brand-icon"></i>
+        <span class="brand-text">LogiParalel</span>
+      </div>
+      <div class="flex-row">
+        <div class="status-toggle">
+          <span class="status-text" id="online-status-text">Online</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-online" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- DASHBOARD TAB -->
+      <section class="tab-panel tab-panel--active" id="tab-dashboard">
+        <div class="greeting-section">
+          <h1 class="greeting-title">Halo, <span id="user-greeting-name">Driver</span></h1>
+          <p class="greeting-subtitle">Siap mengantar pesanan hari ini?</p>
+        </div>
+
+        <div class="quick-actions-grid">
+          <button class="action-btn" data-tab="orders">
+            <div class="action-btn-icon"><i class="ph ph-clipboard-text"></i></div>
+            <span>Pesanan</span>
+          </button>
+          <button class="action-btn" data-tab="tracking">
+            <div class="action-btn-icon"><i class="ph ph-broadcast"></i></div>
+            <span>GPS Status</span>
+          </button>
+          <button class="action-btn" data-tab="earnings">
+            <div class="action-btn-icon"><i class="ph ph-currency-circle-dollar"></i></div>
+            <span>Pendapatan</span>
+          </button>
+          <button class="action-btn" data-tab="chat">
+            <div class="action-btn-icon"><i class="ph ph-chat-circle-dots"></i></div>
+            <span>Pesan</span>
+          </button>
+        </div>
+
+        <div class="stats-cards">
+          <div class="stat-card">
+            <span class="stat-label">Pendapatan</span>
+            <span class="stat-value text-primary" id="stat-today-earnings">Rp 0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Selesai</span>
+            <span class="stat-value" id="stat-total-deliveries">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Rating</span>
+            <span class="stat-value"><i class="ph-fill ph-star text-warning"></i> <span id="stat-rating">0.0</span></span>
+          </div>
+        </div>
+
+        <!-- Active Delivery -->
+        <div class="card" id="active-delivery-card" style="display:none;">
+          <div class="card-header flex-between">
+            <div class="card-title-group">
+              <i class="ph ph-package text-primary"></i>
+              <h3 class="card-title">Tugas Aktif</h3>
+            </div>
+            <span class="badge" id="active-delivery-status">Tugas</span>
+          </div>
+          <div class="card-body">
+            <div id="active-delivery-details" class="detail-list">
+              <!-- Injected by JS -->
+            </div>
+            <div class="mt-4 flex-row" style="gap: 8px;">
+              <button class="btn btn-primary btn-block" id="btn-pickup" style="display:none;">Tandai Dijemput</button>
+              <button class="btn btn-success btn-block" id="btn-deliver" style="display:none;">Selesai Diantar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS TAB -->
+      <section class="tab-panel" id="tab-orders">
+        <div class="flex-between" style="margin-bottom: 20px;">
+          <h1 class="page-title" style="margin: 0;">Bursa Pesanan</h1>
+          <button class="btn btn-sm btn-outline" id="btn-refresh-orders"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+        </div>
+        
+        <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;" id="orders-count">0 pesanan tersedia</p>
+
+        <div class="orders-list" id="orders-list">
+          <div class="empty-state-list">Belum ada pesanan masuk.</div>
+        </div>
+      </section>
+
+      <!-- TRACKING (GPS SIMULATOR) TAB -->
+      <section class="tab-panel" id="tab-tracking">
+        <h1 class="page-title">Modul GPS</h1>
+
+        <div class="card">
+          <div class="card-header flex-between">
+            <h3 class="card-title">Broadcaster GPS</h3>
+            <div class="gps-indicator" id="gps-indicator">
+              <div class="gps-dot" id="gps-dot"></div>
+              <span id="gps-text">Offline</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="text-secondary" style="font-size: 12px; margin-bottom: 16px;">
+              Modul ini menyimulasikan push koordinat GPS real-time ke Firebase (Producer).
+            </p>
+            
+            <div class="form-section">
+              <div class="input-group">
+                <label>Interval Update</label>
+                <select id="gps-interval">
+                  <option value="1000">1 Detik</option>
+                  <option value="3000" selected>3 Detik</option>
+                  <option value="5000">5 Detik</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Simulasi Rute</label>
+                <select id="gps-route">
+                  <option value="sudirman">Sudirman - Thamrin</option>
+                  <option value="circular">Bundaran HI</option>
+                  <option value="random">Acak</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex-row mt-4">
+              <button class="btn btn-success btn-block" id="btn-start-gps">Mulai Transmisi</button>
+              <button class="btn btn-danger btn-block" id="btn-stop-gps" disabled>Hentikan</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="telemetry-grid mt-4">
+          <div class="telemetry-item">
+            <span class="telemetry-label">Latitude</span>
+            <span class="telemetry-val" id="gps-current-lat">-</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Longitude</span>
+            <span class="telemetry-val" id="gps-current-lng">-</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Ping Dikirim</span>
+            <span class="telemetry-val" id="gps-broadcast-count">0</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Kecepatan</span>
+            <span class="telemetry-val" id="gps-current-speed">-</span>
+          </div>
+        </div>
+
+        <div class="map-container mt-4" style="height: 200px;">
+          <div id="courier-map" style="width: 100%; height: 100%;"></div>
+        </div>
+      </section>
+
+      <!-- EARNINGS TAB -->
+      <section class="tab-panel" id="tab-earnings">
+        <h1 class="page-title">Pendapatan</h1>
+
+        <div class="wallet-hero-card" style="background: var(--primary);">
+          <div class="wallet-hero-top">
+            <span class="wallet-hero-label">Total Saldo Wallet</span>
+            <i class="ph ph-wallet"></i>
+          </div>
+          <h2 class="wallet-hero-balance" id="earn-wallet">Rp 0</h2>
+        </div>
+
+        <h3 class="section-title">Rincian Performa</h3>
+        <div class="stats-cards" style="grid-template-columns: 1fr 1fr;">
+          <div class="stat-card">
+            <span class="stat-label">Total Keseluruhan</span>
+            <span class="stat-value" id="earnings-total">Rp 0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Bulan Ini</span>
+            <span class="stat-value" id="earn-month">Rp 0</span>
+          </div>
+        </div>
+
+        <h3 class="section-title mt-4">Riwayat Pengiriman</h3>
+        <div class="transaction-list" id="delivery-history">
+          <div class="empty-state-list">Belum ada riwayat.</div>
+        </div>
+      </section>
+
+      <!-- CHAT TAB -->
+      <section class="tab-panel" id="tab-chat">
+        <h1 class="page-title">Pesan</h1>
+
+        <div class="chat-setup" id="chat-setup">
+          <div class="input-group">
+            <label>Masukkan ID Pesanan</label>
+            <div class="flex-row">
+              <input type="text" id="chat-order-id" placeholder="ORD-..." />
+              <button class="btn btn-primary" id="btn-join-chat">Buka</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-interface card">
+          <div class="chat-header">
+            <div class="chat-avatar"><i class="ph ph-user"></i></div>
+            <div class="chat-info">
+              <h4 id="chat-customer-name">Customer</h4>
+              <span class="chat-status" id="chat-order-display">-</span>
+            </div>
+          </div>
+          
+          <div class="chat-history" id="chat-messages">
+            <div class="empty-chat" id="chat-placeholder">
+              <i class="ph ph-chats"></i>
+              <p>Sambungkan chat untuk berkomunikasi dengan pelanggan.</p>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Tulis pesan..." disabled />
+            <button class="btn-icon" id="btn-send-chat" disabled>
+              <i class="ph ph-paper-plane-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item nav-item--active" data-tab="dashboard">
+        <i class="ph ph-house"></i>
+        <span>Beranda</span>
+      </button>
+      <button class="nav-item" data-tab="orders">
+        <i class="ph ph-clipboard-text"></i>
+        <span>Pesanan</span>
+      </button>
+      <button class="nav-item" data-tab="tracking">
+        <i class="ph ph-broadcast"></i>
+        <span>GPS</span>
+      </button>
+      <button class="nav-item" data-tab="earnings">
+        <i class="ph ph-currency-circle-dollar"></i>
+        <span>Dana</span>
+      </button>
+      <button class="nav-item" data-tab="chat">
+        <i class="ph ph-chat-circle"></i>
+        <span>Pesan</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="script.js"></script>
+</body>
+</html>

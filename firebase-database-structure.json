@@ -1,0 +1,166 @@
+{
+  "users": {
+    "uid_customer_001": {
+      "name": "Budi Santoso",
+      "email": "budi@example.com",
+      "role": "customer",
+      "wallet": {
+        "balance": 250000,
+        "currency": "IDR"
+      },
+      "createdAt": 1749600000000
+    },
+    "uid_courier_001": {
+      "name": "Agus Kurniawan",
+      "email": "agus@example.com",
+      "role": "courier",
+      "vehicle": "Motor Honda Beat - B 1234 XYZ",
+      "isOnline": true,
+      "wallet": {
+        "balance": 125000,
+        "currency": "IDR",
+        "totalEarnings": 1875000
+      },
+      "rating": 4.8,
+      "totalDeliveries": 142,
+      "createdAt": 1749600000000
+    }
+  },
+
+  "orders": {
+    "order_ORD-2026-0001": {
+      "orderId": "ORD-2026-0001",
+      "status": "delivered",
+      "customerId": "uid_customer_001",
+      "courierId": "uid_courier_001",
+      "pickup": {
+        "address": "Jl. Sudirman No. 1, Jakarta Pusat",
+        "lat": -6.208763,
+        "lng": 106.845599,
+        "contactName": "Budi Santoso",
+        "contactPhone": "08123456789"
+      },
+      "destination": {
+        "address": "Jl. Thamrin No. 5, Jakarta Pusat",
+        "lat": -6.193125,
+        "lng": 106.823456,
+        "contactName": "Siti Rahayu",
+        "contactPhone": "08987654321"
+      },
+      "package": {
+        "description": "Dokumen Penting",
+        "weight": 0.5,
+        "weightUnit": "kg",
+        "category": "document"
+      },
+      "pricing": {
+        "baseFee": 15000,
+        "distanceFee": 8000,
+        "totalFee": 23000,
+        "currency": "IDR",
+        "paymentMethod": "wallet"
+      },
+      "timeline": {
+        "createdAt": 1749600000000,
+        "acceptedAt": 1749600300000,
+        "pickedUpAt": 1749601200000,
+        "deliveredAt": 1749603600000
+      },
+      "note": "Titipkan ke satpam jika tidak ada di tempat."
+    },
+    "order_ORD-2026-0002": {
+      "orderId": "ORD-2026-0002",
+      "status": "in_transit",
+      "customerId": "uid_customer_001",
+      "courierId": "uid_courier_001",
+      "pickup": {
+        "address": "Jl. Gatot Subroto No. 10, Jakarta Selatan",
+        "lat": -6.235678,
+        "lng": 106.812345,
+        "contactName": "Budi Santoso",
+        "contactPhone": "08123456789"
+      },
+      "destination": {
+        "address": "Jl. Rasuna Said No. 3, Jakarta Selatan",
+        "lat": -6.218900,
+        "lng": 106.830000,
+        "contactName": "Rina Dewi",
+        "contactPhone": "08555123456"
+      },
+      "package": {
+        "description": "Paket Elektronik - Fragile",
+        "weight": 2.0,
+        "weightUnit": "kg",
+        "category": "electronics"
+      },
+      "pricing": {
+        "baseFee": 15000,
+        "distanceFee": 12000,
+        "totalFee": 27000,
+        "currency": "IDR",
+        "paymentMethod": "wallet"
+      },
+      "timeline": {
+        "createdAt": 1749607200000,
+        "acceptedAt": 1749607500000,
+        "pickedUpAt": 1749608400000,
+        "deliveredAt": null
+      },
+      "note": ""
+    }
+  },
+
+  "tracking": {
+    "uid_courier_001": {
+      "courierId": "uid_courier_001",
+      "courierName": "Agus Kurniawan",
+      "activeOrderId": "order_ORD-2026-0002",
+      "isTracking": true,
+      "currentLocation": {
+        "lat": -6.224500,
+        "lng": 106.820000,
+        "accuracy": 10,
+        "heading": 45,
+        "speed": 30,
+        "altitude": 0
+      },
+      "lastUpdated": 1749608700000
+    }
+  },
+
+  "chats": {
+    "order_ORD-2026-0002": {
+      "orderId": "order_ORD-2026-0002",
+      "participants": {
+        "customer": "uid_customer_001",
+        "courier": "uid_courier_001"
+      },
+      "messages": {
+        "msg_001": {
+          "senderId": "uid_customer_001",
+          "senderName": "Budi Santoso",
+          "senderRole": "customer",
+          "text": "Halo Pak, sudah sampai mana?",
+          "timestamp": 1749608500000,
+          "read": true
+        },
+        "msg_002": {
+          "senderId": "uid_courier_001",
+          "senderName": "Agus Kurniawan",
+          "senderRole": "courier",
+          "text": "Sudah dekat, sekitar 5 menit lagi tiba Pak!",
+          "timestamp": 1749608560000,
+          "read": true
+        },
+        "msg_003": {
+          "senderId": "uid_customer_001",
+          "senderName": "Budi Santoso",
+          "senderRole": "customer",
+          "text": "Oke, terima kasih ya.",
+          "timestamp": 1749608580000,
+          "read": false
+        }
+      }
+    }
+  }
+}

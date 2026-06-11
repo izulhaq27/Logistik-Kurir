@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="LogiParalel Customer App" />
+  <title>LogiParalel | Customer</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Phosphor Icons (Clean, professional icons) -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- Leaflet.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Top Navbar -->
+    <header class="top-nav">
+      <div class="brand">
+        <i class="ph-fill ph-package brand-icon"></i>
+        <span class="brand-text">LogiParalel</span>
+      </div>
+      <div class="user-chip">
+        <i class="ph ph-wallet"></i>
+        <span id="nav-balance-display">Rp 0</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- DASHBOARD TAB -->
+      <section class="tab-panel tab-panel--active" id="tab-dashboard">
+        <div class="greeting-section">
+          <h1 class="greeting-title">Selamat Datang, <span id="user-greeting-name">Budi</span></h1>
+          <p class="greeting-subtitle">Mau kirim paket apa hari ini?</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-grid">
+          <button class="action-btn" data-tab="order">
+            <div class="action-btn-icon"><i class="ph ph-paper-plane-tilt"></i></div>
+            <span>Kirim Paket</span>
+          </button>
+          <button class="action-btn" data-tab="tracking">
+            <div class="action-btn-icon"><i class="ph ph-map-pin-line"></i></div>
+            <span>Lacak</span>
+          </button>
+          <button class="action-btn" data-tab="wallet">
+            <div class="action-btn-icon"><i class="ph ph-wallet"></i></div>
+            <span>Top-Up</span>
+          </button>
+          <button class="action-btn" data-tab="chat">
+            <div class="action-btn-icon"><i class="ph ph-chat-circle-dots"></i></div>
+            <span>Chat Kurir</span>
+          </button>
+        </div>
+
+        <!-- Stats Overview -->
+        <h2 class="section-title">Ringkasan</h2>
+        <div class="stats-cards">
+          <div class="stat-card">
+            <span class="stat-label">Total Pesanan</span>
+            <span class="stat-value" id="stat-total-orders">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Dalam Perjalanan</span>
+            <span class="stat-value" id="stat-in-transit">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Terkirim</span>
+            <span class="stat-value" id="stat-delivered">0</span>
+          </div>
+        </div>
+
+        <!-- Active Order -->
+        <div class="card" id="active-order-card" style="display:none;">
+          <div class="card-header flex-between">
+            <div class="card-title-group">
+              <i class="ph ph-clock-countdown text-primary"></i>
+              <h3 class="card-title">Pesanan Aktif</h3>
+            </div>
+            <button class="text-btn" id="btn-track-active">Lacak Detail</button>
+          </div>
+          <div class="card-body">
+            <div class="stepper" id="active-order-flow">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDER TAB -->
+      <section class="tab-panel" id="tab-order">
+        <h1 class="page-title">Kirim Paket</h1>
+        
+        <form class="order-form" id="order-form">
+          <div class="form-section">
+            <h3 class="form-section-title"><i class="ph ph-map-pin"></i> Detail Penjemputan</h3>
+            <div class="input-group">
+              <label>Alamat Lengkap</label>
+              <input type="text" id="pickup-address" placeholder="Contoh: Jl. Sudirman No. 1" required />
+            </div>
+            <div class="input-row">
+              <div class="input-group">
+                <label>Nama Pengirim</label>
+                <input type="text" id="pickup-contact" placeholder="Nama" required />
+              </div>
+              <div class="input-group">
+                <label>No. Handphone</label>
+                <input type="tel" id="pickup-phone" placeholder="08xxx" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title"><i class="ph ph-flag"></i> Detail Tujuan</h3>
+            <div class="input-group">
+              <label>Alamat Lengkap</label>
+              <input type="text" id="dest-address" placeholder="Contoh: Jl. Thamrin No. 5" required />
+            </div>
+            <div class="input-row">
+              <div class="input-group">
+                <label>Nama Penerima</label>
+                <input type="text" id="dest-contact" placeholder="Nama" required />
+              </div>
+              <div class="input-group">
+                <label>No. Handphone</label>
+                <input type="tel" id="dest-phone" placeholder="08xxx" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title"><i class="ph ph-package"></i> Informasi Paket</h3>
+            <div class="input-group">
+              <label>Deskripsi Barang</label>
+              <input type="text" id="pkg-desc" placeholder="Contoh: Dokumen penting" required />
+            </div>
+            <div class="input-row">
+              <div class="input-group">
+                <label>Berat (Kg)</label>
+                <input type="number" id="pkg-weight" placeholder="1.0" min="0.1" step="0.1" required />
+              </div>
+              <div class="input-group">
+                <label>Kategori</label>
+                <select id="pkg-category">
+                  <option value="document">Dokumen</option>
+                  <option value="electronics">Elektronik</option>
+                  <option value="clothing">Pakaian</option>
+                  <option value="food">Makanan</option>
+                  <option value="general">Umum</option>
+                </select>
+              </div>
+            </div>
+            <div class="input-group">
+              <label>Catatan Tambahan (Opsional)</label>
+              <textarea id="order-note" rows="2" placeholder="Instruksi untuk kurir..."></textarea>
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-row">
+              <span>Estimasi Biaya Dasar</span>
+              <span id="fee-base">Rp 15.000</span>
+            </div>
+            <div class="summary-row font-medium">
+              <span>Total Estimasi Pembayaran</span>
+              <span id="fee-total" class="text-primary">Rp 15.000+</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btn-submit-order">
+            <span class="btn-text">Pesan Sekarang</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- TRACKING TAB -->
+      <section class="tab-panel" id="tab-tracking">
+        <h1 class="page-title">Live Tracking</h1>
+
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="track-order-id" placeholder="Masukkan ID Pesanan (ORD-...)" />
+          <button class="btn btn-sm btn-primary" id="btn-start-tracking">Cari</button>
+        </div>
+
+        <div class="courier-card" id="courier-info-bar">
+          <div class="courier-avatar">
+            <i class="ph ph-user"></i>
+          </div>
+          <div class="courier-info">
+            <h4 id="courier-name">Menunggu kurir...</h4>
+            <p id="courier-vehicle">-</p>
+          </div>
+          <div class="status-badge" id="tracking-status-badge">Offline</div>
+        </div>
+
+        <div class="map-container">
+          <div id="map"></div>
+          <div class="map-overlay" id="map-overlay">
+            <div class="empty-state-content">
+              <i class="ph ph-map-pin-line"></i>
+              <p>Masukkan ID Pesanan untuk melacak posisi kurir secara live.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="telemetry-grid">
+          <div class="telemetry-item">
+            <span class="telemetry-label">Kecepatan</span>
+            <span class="telemetry-val" id="coord-speed">-</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Latitude</span>
+            <span class="telemetry-val" id="coord-lat">-</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Longitude</span>
+            <span class="telemetry-val" id="coord-lng">-</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Update Terakhir</span>
+            <span class="telemetry-val" id="coord-updated">-</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- WALLET TAB -->
+      <section class="tab-panel" id="tab-wallet">
+        <h1 class="page-title">Dompet Digital</h1>
+
+        <div class="wallet-hero-card">
+          <div class="wallet-hero-top">
+            <span class="wallet-hero-label">Saldo Aktif</span>
+            <i class="ph ph-wallet"></i>
+          </div>
+          <h2 class="wallet-hero-balance" id="wallet-balance-display">Rp 0</h2>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Isi Saldo</h3>
+          <div class="topup-options">
+            <button class="topup-btn" data-amount="50000">50K</button>
+            <button class="topup-btn" data-amount="100000">100K</button>
+            <button class="topup-btn" data-amount="200000">200K</button>
+            <button class="topup-btn" data-amount="500000">500K</button>
+          </div>
+          <form class="custom-topup-form" id="topup-form">
+            <div class="input-group">
+              <label>Nominal Lainnya</label>
+              <input type="number" id="topup-amount" placeholder="Minimal Rp 10.000" min="10000" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="btn-topup">
+              <span class="btn-text">Top-Up Saldo</span>
+            </button>
+          </form>
+        </div>
+
+        <h3 class="section-title mt-4">Riwayat Transaksi</h3>
+        <div class="transaction-list" id="transaction-list">
+          <!-- Injected via JS -->
+          <div class="empty-state-list" id="tx-empty">Belum ada transaksi.</div>
+        </div>
+      </section>
+
+      <!-- CHAT TAB -->
+      <section class="tab-panel" id="tab-chat">
+        <h1 class="page-title">Pusat Bantuan</h1>
+
+        <div class="chat-setup" id="chat-setup">
+          <div class="input-group">
+            <label>ID Pesanan</label>
+            <div class="flex-row">
+              <input type="text" id="chat-order-id" placeholder="Contoh: ORD-..." />
+              <button class="btn btn-primary" id="btn-join-chat">Mulai Chat</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-interface card">
+          <div class="chat-header">
+            <div class="chat-avatar"><i class="ph ph-user"></i></div>
+            <div class="chat-info">
+              <h4 id="chat-courier-name">Kurir</h4>
+              <span class="chat-status" id="chat-order-id-display">Belum terhubung</span>
+            </div>
+          </div>
+          
+          <div class="chat-history" id="chat-messages">
+            <div class="empty-chat" id="chat-placeholder">
+              <i class="ph ph-chats-circle"></i>
+              <p>Silakan masukkan ID Pesanan untuk memulai obrolan.</p>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ketik pesan..." disabled />
+            <button class="btn-icon" id="btn-send-chat" disabled>
+              <i class="ph ph-paper-plane-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item nav-item--active" data-tab="dashboard">
+        <i class="ph ph-house"></i>
+        <span>Beranda</span>
+      </button>
+      <button class="nav-item" data-tab="order">
+        <i class="ph ph-plus-square"></i>
+        <span>Pesan</span>
+      </button>
+      <button class="nav-item" data-tab="tracking">
+        <i class="ph ph-map-pin"></i>
+        <span>Lacak</span>
+      </button>
+      <button class="nav-item" data-tab="wallet">
+        <i class="ph ph-wallet"></i>
+        <span>Dompet</span>
+      </button>
+      <button class="nav-item" data-tab="chat">
+        <i class="ph ph-chat-circle"></i>
+        <span>Chat</span>
+      </button>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <!-- Firebase v10+ (Compat Mode CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <!-- Leaflet.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- App Script -->
+  <script src="script.js"></script>
+</body>
+</html>
