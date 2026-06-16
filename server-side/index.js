@@ -48,7 +48,7 @@ const serviceAccount = {
   type:                        "service_account",
   project_id:                  process.env.FIREBASE_PROJECT_ID,
   client_email:                process.env.FIREBASE_CLIENT_EMAIL,
-  // Render stores env vars as strings — newlines must be un-escaped.
+  // Menangani masalah newline (\n) yang sering terjadi saat deployment di Vercel/Render
   private_key:                 (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
 };
 
