@@ -1,6 +1,6 @@
 "use strict";
 
-const BACKEND_URL = "http://localhost:3000";
+const ORDER_SERVICE_URL = "https://api-order.logistikkurir.ran.web.id";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBk3WXJYNDPAZVbscReKieiDbyPlUJxwb4",
   authDomain: "logistikkurir-77855.firebaseapp.com",
@@ -84,6 +84,11 @@ function switchTab(tabName) {
     initCourierMap();
     setTimeout(() => courierMap?.invalidateSize(), 150);
   }
+
+  if (tabName === "chat" && activeOrderData && activeOrderData.orderId && activeChatOrderId !== activeOrderData.orderId) {
+    document.getElementById("chat-order-id").value = activeOrderData.orderId;
+    joinChat(activeOrderData.orderId);
+  }
 }
 
 document.querySelectorAll("[data-tab]").forEach(btn => {
@@ -115,9 +120,13 @@ async function loadDashboardData() {
     const ordersSnap = await dbRef.ref("/orders").orderByChild("courierId").equalTo(DEMO_COURIER.uid).once("value");
     const ordersData = ordersSnap.val() || {};
     let active = null;
-    Object.values(ordersData).forEach(order => {
-      if (["accepted", "in_transit"].includes(order.status)) active = order;
-    });
+    Object.values(ordersData)
+      .sort((a, b) => (b.timeline?.createdAt || 0) - (a.timeline?.createdAt || 0))
+      .forEach(order => {
+        if (["accepted", "in_transit"].includes(order.status)) {
+          if (!active) active = order;
+        }
+      });
 
     if (active) {
       activeOrderData = active;
@@ -157,7 +166,7 @@ document.getElementById("btn-deliver").addEventListener("click", () => updateOrd
 async function updateOrderStatus(newStatus) {
   if (!activeOrderData) return;
   try {
-    const res = await fetch(`${BACKEND_URL}/api/order/${activeOrderData.orderId}/status`, {
+    const res = await fetch(`${ORDER_SERVICE_URL}/api/order/${activeOrderData.orderId}/status`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus, courierId: DEMO_COURIER.uid })
     });
@@ -182,7 +191,7 @@ async function loadPendingOrders() {
   const list = document.getElementById("orders-list");
   const countDisplay = document.getElementById("orders-count");
   try {
-    const res = await fetch(`${BACKEND_URL}/api/orders/pending`);
+    const res = await fetch(`${ORDER_SERVICE_URL}/api/orders/pending`);
     const result = await res.json();
     const orders = result.orders || [];
     countDisplay.textContent = `${orders.length} pesanan tersedia`;
@@ -215,7 +224,7 @@ document.getElementById("btn-refresh-orders").addEventListener("click", loadPend
 window.acceptOrder = async function(orderId) {
   if (activeOrderData) return alert("Selesaikan pesanan aktif dulu.");
   try {
-    const res = await fetch(`${BACKEND_URL}/api/order/${orderId}/status`, {
+    const res = await fetch(`${ORDER_SERVICE_URL}/api/order/${orderId}/status`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "accepted", courierId: DEMO_COURIER.uid })
     });
@@ -331,6 +340,10 @@ document.getElementById("btn-send-chat").addEventListener("click", async () => {
     text, timestamp: firebase.database.ServerValue.TIMESTAMP,
   });
   input.value = "";
+});
+
+document.getElementById("chat-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("btn-send-chat").click();
 });
 
 document.getElementById("toggle-online").addEventListener("change", e => {

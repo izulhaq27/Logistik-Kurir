@@ -1,6 +1,7 @@
 "use strict";
 
-const BACKEND_URL = "http://localhost:3000";
+const ORDER_SERVICE_URL = "https://api-order.logistikkurir.ran.web.id"; 
+const WALLET_SERVICE_URL = "https://api-wallet.logistikkurir.ran.web.id";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBk3WXJYNDPAZVbscReKieiDbyPlUJxwb4",
   authDomain: "logistikkurir-77855.firebaseapp.com",
@@ -54,6 +55,11 @@ function switchTab(tabName) {
   if (tabName === "tracking") {
     setTimeout(() => map.invalidateSize(), 150);
   }
+
+  if (tabName === "chat" && activeOrderId && activeChatOrderId !== activeOrderId) {
+    document.getElementById("chat-order-id").value = activeOrderId;
+    joinChat(activeOrderId);
+  }
 }
 
 document.querySelectorAll("[data-tab]").forEach(btn => {
@@ -96,12 +102,16 @@ async function loadDashboardData() {
     let totalOrders = 0, delivered = 0, inTransit = 0;
     let latestActive = null;
 
-    Object.values(ordersData).forEach(order => {
-      totalOrders++;
-      if (order.status === "delivered") delivered++;
-      if (order.status === "in_transit") { inTransit++; latestActive = order; }
-      if (order.status === "accepted") { inTransit++; if (!latestActive) latestActive = order; }
-    });
+    Object.values(ordersData)
+      .sort((a, b) => (b.timeline?.createdAt || 0) - (a.timeline?.createdAt || 0))
+      .forEach(order => {
+        totalOrders++;
+        if (order.status === "delivered") delivered++;
+        if (["pending", "accepted", "in_transit"].includes(order.status)) {
+          if (order.status === "in_transit" || order.status === "accepted") inTransit++;
+          if (!latestActive) latestActive = order;
+        }
+      });
 
     document.getElementById("stat-total-orders").textContent = totalOrders;
     document.getElementById("stat-delivered").textContent = delivered;
@@ -193,7 +203,7 @@ document.getElementById("order-form").addEventListener("submit", async (e) => {
   btnText.textContent = "Memproses...";
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/create-order`, {
+    const res = await fetch(`${ORDER_SERVICE_URL}/api/create-order`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
@@ -235,7 +245,7 @@ document.getElementById("topup-form").addEventListener("submit", async (e) => {
   btnText.textContent = "Memproses...";
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/topup-wallet`, {
+    const res = await fetch(`${WALLET_SERVICE_URL}/api/topup-wallet`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: DEMO_USER.uid, amount })
     });
