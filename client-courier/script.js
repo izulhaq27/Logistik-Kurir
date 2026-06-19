@@ -1,6 +1,6 @@
 "use strict";
 
-const ORDER_SERVICE_URL = "https://api-order.logistikkurir.ran.web.id";
+const ORDER_SERVICE_URL = "https://api-order.krupukruzzz.com";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBk3WXJYNDPAZVbscReKieiDbyPlUJxwb4",
   authDomain: "logistikkurir-77855.firebaseapp.com",
